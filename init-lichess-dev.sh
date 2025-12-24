@@ -1,6 +1,21 @@
 #!/bin/bash
-LILA_DIR="/Users/john.doknjas/lichess/lila"
+DEFAULT_LILA_DIR="/Users/john.doknjas/lichess/lila"
 LILA_WS_DIR="/Users/john.doknjas/lichess/lila-ws"
+
+# If start-lila() was used, it drops the caller's cwd here.
+START_DIR_FILE="${TMPDIR:-/tmp}/lichess-start-dir"
+
+LILA_DIR="$DEFAULT_LILA_DIR"
+if [[ -f "$START_DIR_FILE" ]]; then
+  # Read first line only
+  IFS= read -r maybe_dir < "$START_DIR_FILE" || true
+  rm -f "$START_DIR_FILE"
+
+  if [[ -n "${maybe_dir:-}" && -d "$maybe_dir" ]]; then
+    LILA_DIR="$maybe_dir"
+  fi
+fi
+
 tmux new-session -d -s my_session "cd '$LILA_DIR' && source ~/.zshrc && echo 'Command: ./lila.sh'; bash"
 tmux setw remain-on-exit on
 tmux split-window -h "cd '$LILA_DIR' && ui/build -w; bash"
