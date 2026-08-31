@@ -4,6 +4,9 @@ DEFAULT_LILA_DIR="/home/johnd/lichess/lila"
 LILA_WS_DIR="/home/johnd/lichess/lila-ws"
 OPENINGEXPLORER_DIR="/home/johnd/lichess/lila-openingexplorer"
 
+# set by start-public-dev.sh when serving through a cloudflare tunnel
+CSRF_ORIGIN="${LILA_CSRF_ORIGIN:-http://localhost:9663}"
+
 START_DIR_FILE="${TMPDIR:-/tmp}/lichess-start-dir"
 SESSION_NAME="my_session"
 WSL_DISTRO="Ubuntu-24.04"
@@ -38,7 +41,7 @@ tmux split-window -v "cd '$LILA_DIR' && pgrep -x mongod >/dev/null || { sudo rm 
 tmux split-window -h "cd '$OPENINGEXPLORER_DIR' && source ~/.bashrc && ulimit -n 131072 && EXPLORER_LOG=lila_openingexplorer=info ./target/release/lila-openingexplorer --db-compaction-readahead --lila http://localhost:9663 --cors; bash"
 tmux resize-pane -L 30
 
-tmux split-window -h "cd '$LILA_WS_DIR' && source ~/.bashrc && sbt run -Dcsrf.origin=http://localhost:9663; bash"
+tmux split-window -h "cd '$LILA_WS_DIR' && source ~/.bashrc && sbt 'set javaOptions += \"-Dcsrf.origin=$CSRF_ORIGIN\"; run'; bash"
 
 tmux swap-pane -s 1 -t 2
 
